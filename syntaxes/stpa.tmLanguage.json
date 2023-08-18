@@ -1,0 +1,71 @@
+{
+  "name": "stpa",
+  "scopeName": "source.stpa",
+  "fileTypes": [
+    ".stpa"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "name": "keyword.control.stpa",
+      "match": "\\b(Context-Table|ControlStructure|ControllerConstraints|Hazards|LossScenarios|Losses|MAX|MIN|Responsibilities|SafetyRequirements|SystemConstraints|UCAs|applied-too-long|controlActions|false|feedback|for|hierarchyLevel|input|label|not-provided|notProviding|output|processModel|provided|providing|stopped-too-soon|stoppedTooSoon|too-early|too-late|tooEarly/Late|true|wrong-time)\\b|\\b(contexts:|controlAction:|type:)\\B"
+    },
+    {
+      "name": "string.quoted.double.stpa",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "include": "#string-character-escape"
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.single.stpa",
+      "begin": "'",
+      "end": "'",
+      "patterns": [
+        {
+          "include": "#string-character-escape"
+        }
+      ]
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.stpa",
+          "begin": "/\\*",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.stpa"
+            }
+          },
+          "end": "\\*/",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.stpa"
+            }
+          }
+        },
+        {
+          "begin": "//",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.whitespace.comment.leading.stpa"
+            }
+          },
+          "end": "(?=$)",
+          "name": "comment.line.stpa"
+        }
+      ]
+    },
+    "string-character-escape": {
+      "name": "constant.character.escape.stpa",
+      "match": "\\\\(x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|u\\{[0-9A-Fa-f]+\\}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.|$)"
+    }
+  }
+}

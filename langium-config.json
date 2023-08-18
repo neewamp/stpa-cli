@@ -1,0 +1,12 @@
+{
+    "projectName": "Stpa",
+    "languages": [{
+        "id": "stpa",
+        "grammar": "src/language/stpa.langium",
+        "fileExtensions": [".stpa"],
+        "textMate": {
+            "out": "syntaxes/stpa.tmLanguage.json"
+        }
+    }],
+    "out": "src/language/generated"
+}
