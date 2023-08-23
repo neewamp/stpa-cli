@@ -8,7 +8,7 @@ import { Err } from "pratica";
 // [Object object] when trying to use a toString function???
 // TODO class seems like a nice option. But type seems more robust without overloading though. 
 type Ident = {
-    qualifier?: Ident; // The question mark is the same as `Ident | undefined` in other words is optional
+    qualifier: Ident | null; // The question mark is the same as `Ident | undefined` in other words is optional
     name: string;
 }
 
@@ -23,7 +23,7 @@ function IdentToString(i: Ident): string {
 function IdentOfList(l: string[]): Ident {
     if(l?.length) {
         if(l?.length == 1) {
-            return {name: l[0]};
+            return {qualifier: null, name: l[0]};
         }
         else {
             return {
@@ -88,7 +88,7 @@ function TypeToString(t : Type): string {
   }
  */
 let t_lit_ex: Type = 
- {qualifier: {name: "hmm"}, name: "hi"};
+ {qualifier: {qualifier: null, name: "hmm"}, name: "hi"};
 
 console.log(TypeToString(t_lit_ex));
 
@@ -130,6 +130,13 @@ type BinaryExpr = {
 
 type Expr = Ident | LiteralExp | UnaryExpr | BinaryExpr
 
+let ex_binop: Expr = {
+    op: "MULT",
+    e1: {i: 10 as int},
+    e2: {i: 1 as int}
+}
+
+
 type Action = {
     name: string
     allowed: Expr[]
@@ -152,4 +159,14 @@ type UCA = {
     type: UCAType 
     context: Expr
 }
+
+let ucs_ex : UCA = {
+    action: {qualifier: null, name: "Action1"},
+    type: "issued",
+    context: ex_binop
+}
+
+// Testing the representation of javascripts automatic generation of json from objects to see if it will be 
+// compatable with the python version in solver-aided-stpa
+console.log(JSON.stringify(ucs_ex))
 
