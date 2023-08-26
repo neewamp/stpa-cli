@@ -1,0 +1,3 @@
+[submodule "solver-aided-stpa"]
+	path = solver-aided-stpa
+	url = git@github.com:bagnalla/solver-aided-stpa.git
