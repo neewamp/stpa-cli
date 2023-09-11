@@ -307,11 +307,11 @@ export const StpaGrammar = (): Grammar => loadedStpaGrammar ?? (loadedStpaGramma
             "feature": "action",
             "operator": "=",
             "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@11"
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@23"
               },
-              "deprecatedSyntax": false
+              "arguments": []
             }
           },
           {

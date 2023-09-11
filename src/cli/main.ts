@@ -1,12 +1,16 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
-import { Model } from '../language/generated/ast';
+import { Model, Rule, isModel } from '../language/generated/ast';
 import { StpaLanguageMetaData } from '../language/generated/module';
 import { createStpaServices } from '../language/stpa-module';
 import { extractAstNode } from './cli-util';
 import { extractDocument } from './cli-util';
 import { generateJavaScript } from './generator';
 import { NodeFileSystem } from 'langium/node';
+import { AstNode } from 'langium';
+import { myContext, myRule, rule_to_myRule } from '../compiler/UCA';
+import { sendRule } from './uca-table-interface';
+import { PythonShellError } from 'python-shell';
 
 export const generateAction = async (fileName: string, opts: GenerateOptions): Promise<void> => {
     const services = createStpaServices(NodeFileSystem).Stpa;
@@ -38,6 +42,24 @@ export const parseAndValidate = async (fileName: string): Promise<void> => {
         console.log(chalk.green(`Parsed and validated ${fileName} successfully!`));
     } else {
         console.log(chalk.red(`Failed to parse and validate ${fileName}!`));
+        process.exit(-1);
+    }
+    const ast: AstNode = parseResult.value;
+
+    if(isModel(ast)){
+    for(var rule of ast.rules) {
+            try { 
+                sendRule(rule_to_myRule(rule))
+            }
+            catch(error: any) {
+                console.log(`Problem running send rule with rule named: ${rule.name}`)
+                console.log(error.message)
+            }
+            /* console.log(JSON.stringify(r)); */
+        }
+    }
+    else {
+        process.exit(1);
     }
 };
 

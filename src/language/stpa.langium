@@ -30,7 +30,7 @@ entry Model:
 
 Rule:
     name=ID '{'
-        'controlAction:' system=ID '.' action=[Command]
+        'controlAction:' system=ID '.' action=ID
         'type:' type=('not-provided' | 'provided' | 'too-late' | 'too-early' | 'wrong-time' | 'applied-too-long' | 'stopped-too-soon')
         'contexts:' '{'
             contexts+=Context*

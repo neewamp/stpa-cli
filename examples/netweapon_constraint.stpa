@@ -1,0 +1,160 @@
+Losses
+L1 "Kill or Injure Friendlies" 
+L2 "Damage Friendly Assets" 
+L3 "Mission Failure" 
+L4 "Violate Rules of Engagement (ROE)" 
+L5 "Critical Information (CPI) Loss" 
+
+Hazards
+H1 "Kill or Injure Friendlies" [L1, L2, L3, L4]
+H2 "Damage Friendly Assets" [L3, L4]
+H3 "Mission Failure" [L3]
+H4 "Violate Rules of Engagement (ROE)" [L3, L4]
+H5 "Critical Information (CPI) Loss" [L5]
+
+SystemConstraints
+SC1 "Kill or Injure Friendlies" [H1]
+SC2 "Damage Friendly Assets" [H2]
+SC3 "Mission Failure" [H3]
+SC4 "Violate Rules of Engagement (ROE)" [H4]
+SC5 "Critical Information (CPI) Loss" [H5]
+
+ControlStructure
+NetWeaponAbort {
+   Aircrew {
+        //Scan the planned target area for presence of friendlies and non-combatants.  
+        //Provide an encrypted ABORT Command when target is invalid. 
+        //Specify target classification to AWC for automatic inhibition of weapon function (ABORT)	
+        //Scan the planned target area for presence of friendlies and non-combatants.  
+        //Provide an encrypted ABORT Command when target is invalid. Specify target classification to AWC for automatic inhibition of weapon function (ABORT)
+
+        hierarchyLevel 0
+        processModel {
+            Target_Engaged_Valid: [True, False]
+            Resolved_matches_Classification_Commanded: [True, False]
+            Area_Clear_non_combatants: [True, False]
+            Area_Clear_Friendlies: [True, False]
+            ABORT_Command_Aircrew_PMV: [True, False]
+        }
+        //input [var "var description", var "var description"]
+        //output [var "var description", var "var description"]
+        controlActions {
+            [ABORT_Command_Aircrew "ABORT Command_Aircrew", Target_Command_Aircrew "TARGET SPECIFICATION: Aircrew"] -> Weapon_Abort_Controller 
+        }
+
+    }
+    JTAC {
+        hierarchyLevel 0
+        processModel {
+            Target_Engaged_Valid: [True, False]
+        }
+        controlActions {
+            [ABORT_Command_JTAC "ABORT Command JTAC", Target_Command_JTAC "TARGET SPECIFICATION: JTAC"] -> Weapon_Abort_Controller 
+        }
+    }
+    Weapon_Abort_Controller {
+        hierarchyLevel 2
+        processModel {
+            Safe_Separation: [True, False,Unknown]
+            Target_Class_MissMatch: [True,False,Unknown]
+            Abort_Command_Recieved: [True,False,Unknown]
+        }
+        controlActions {
+            [ABORT_Signal_Weapon_Controller "ABORT Signal_Wpn Controller", Target_Signal "Target Specification Signal"] -> Weapon 
+        }
+        feedback {
+            [Target_Classification_Resolved "Target Class resolved WAC"] -> Aircrew
+            [Target_Classification_Resolved2 "Target Class resolved WAC"] -> JTAC
+        }
+    }
+    Weapon {
+        hierarchyLevel 3
+        feedback {
+            [Target_Class_Resolution "Target Classification Resolution", Safe_Separation "Safe Seperation"] -> Weapon_Abort_Controller
+        }
+    }
+}
+
+Responsibilities
+Weapon_Abort_Controller {
+R1 "Receive encrypted ABORT Command  when issued by human controller, decrypt, and inhibit weapon function via ABORT Signal. Inhibit weapon function via ABORT Signal when target classification differs from Specified target provided by Human Controller" [SC3, SC4]
+}
+
+Aircrew {
+R2 "Scan the planned target area for presence of friendlies and non-combatants.  Provide an encrypted ABORT Command when target is invalid. Specify target classification to AWC for automatic inhibition of weapon function (ABORT)" [SC1, SC2, SC4]
+}
+
+JTAC {
+R3 "Scan the planned target area for presence of friendlies and non-combatants. Provide an encrypted ABORT Command when target is invalid. Specify target to AWC for automatic inhibition of weapon function (ABORT)" [SC1, SC2, SC4]
+}
+
+
+Context-Table
+RL1 {
+    controlAction: Weapon_Abort_Controller.ABORT_Signal_Weapon_Controller
+    type: not-provided
+    contexts: {
+        //UCA1 "«Weapon ABORT Controller» does not provide the «ABORT SIgnal» control action when commanded by JTAC or Aircrew (H4)" [H4]
+        UCA27 [Safe_Separation = True, Abort_Command_Recieved=True,Target_Class_MissMatch=True] [H4]
+        UCA28 [Safe_Separation = True, Abort_Command_Recieved=True,Target_Class_MissMatch=Unknown] [H4]
+        UCA29 [Safe_Separation = True, Abort_Command_Recieved=False,Target_Class_MissMatch=True] [H4]
+        UCA30 [Safe_Separation = True, Abort_Command_Recieved=Unknown,Target_Class_MissMatch=True] [H4]    
+    }
+}
+RL2 {
+    controlAction: Weapon_Abort_Controller.ABORT_Signal_Weapon_Controller
+    type: provided
+    contexts: {
+        //UCA2 "«Weapon ABORT Controller» provides the «ABORT SIgnal» control action when weapon is within close proximity to aircraft or has not yet reached safe escape / safe separation distance (H1,H2)" [H1, H2]
+        UCA5 [Safe_Separation=False, Abort_Command_Recieved=True, Target_Class_MissMatch=True] [H1]
+        UCA6 [Safe_Separation=False, Abort_Command_Recieved=True, Target_Class_MissMatch=False] [H1]
+        UCA7 [Safe_Separation=False, Abort_Command_Recieved=True, Target_Class_MissMatch=Unknown] [H1]
+        UCA8 [Safe_Separation=False, Abort_Command_Recieved=False, Target_Class_MissMatch=True] [H1]
+        UCA9 [Safe_Separation=False, Abort_Command_Recieved=False, Target_Class_MissMatch=False] [H1]
+        UCA10 [Safe_Separation=False, Abort_Command_Recieved=False, Target_Class_MissMatch=Unknown] [H1]
+        UCA11 [Safe_Separation=False, Abort_Command_Recieved=Unknown, Target_Class_MissMatch=True] [H1]
+        UCA12 [Safe_Separation=False, Abort_Command_Recieved=Unknown, Target_Class_MissMatch=False] [H1]
+        UCA13 [Safe_Separation=False, Abort_Command_Recieved=Unknown, Target_Class_MissMatch=Unknown] [H1]
+        UCA14 [Safe_Separation=Unknown, Abort_Command_Recieved=True, Target_Class_MissMatch=True] [H1]
+        UCA15 [Safe_Separation=Unknown, Abort_Command_Recieved=True, Target_Class_MissMatch=False] [H1]
+        UCA16 [Safe_Separation=Unknown, Abort_Command_Recieved=True, Target_Class_MissMatch=Unknown] [H1]
+        UCA17 [Safe_Separation=Unknown, Abort_Command_Recieved=False, Target_Class_MissMatch=True] [H1]
+        UCA18 [Safe_Separation=Unknown, Abort_Command_Recieved=False, Target_Class_MissMatch=False] [H1]
+        UCA19 [Safe_Separation=Unknown, Abort_Command_Recieved=False, Target_Class_MissMatch=Unknown] [H1]
+        UCA20 [Safe_Separation=Unknown, Abort_Command_Recieved=Unknown, Target_Class_MissMatch=True] [H1, H4]
+        UCA21 [Safe_Separation=Unknown, Abort_Command_Recieved=Unknown, Target_Class_MissMatch=False] [H1]
+        UCA22 [Safe_Separation=Unknown, Abort_Command_Recieved=Unknown, Target_Class_MissMatch=Unknown] [H1]
+        UCA23 [Safe_Separation=True, Abort_Command_Recieved=False, Target_Class_MissMatch=False] [H1, H4]
+        UCA24 [Safe_Separation=True, Abort_Command_Recieved=False, Target_Class_MissMatch=Unknown] [H1]
+        }
+}
+RL3 {
+    controlAction: Weapon_Abort_Controller.ABORT_Signal_Weapon_Controller
+    type: too-early
+    contexts: {
+    //UCA3 "«Weapon ABORT Controller» provides the «ABORT SIgnal» control action when weapon has not reached safe escape / safe separation (H1)" [H1]
+    //UCA4 "«Weapon ABORT Controller» provides the «ABORT SIgnal» control action when weapon lacks energy to reach desired safe impact point or generate sufficient miss distance from invalid target that caused the ABORT to be issued. (H2, H4)" [H2, H4] 
+    }
+}
+RL4 {
+    controlAction: Weapon_Abort_Controller.ABORT_Signal_Weapon_Controller
+    type: too-late
+    contexts: {
+        //UCA5 "«Weapon ABORT Controller» stops the «ABORT SIgnal» control action when insufficient time s commanded to steer weapon away from invalid target. (H4)" [H4]
+        //UCA6 "«Weapon ABORT Controller» applies the «ABORT SIgnal» control action for too long a period causing the weapon to miss its planned dump target and impact at or near another invalid target (H4)" [H4]
+    }
+}
+
+ControllerConstraints
+C1 "Kill or Injure Friendlies" [UCA5]
+C2 "Damage Friendly Assets" [ UCA27]
+C3 "Mission Failure" [UCA28]
+C4 "Violate Rules of Engagement (ROE)" [UCA28]
+C5 "Critical Information (CPI) Loss" [UCA29]
+
+LossScenarios
+Scenario1 for UCA5 "«Weapon ABORT Controller» does not provide the «ABORT SIgnal» control action when commanded by JTAC or Aircrew"	
+
+SafetyRequirements
+SR1 "«Weapon ABORT Controller» must provide the «ABORT SIgnal» control action when commanded by JTAC or Aircrew" [Scenario1]
+

@@ -213,7 +213,7 @@ export function isResps(item: unknown): item is Resps {
 export interface Rule extends AstNode {
     readonly $container: Model;
     readonly $type: 'Rule';
-    action: Reference<Command>
+    action: string
     contexts: Array<Context>
     name: string
     system: string
@@ -353,9 +353,6 @@ export class StpaAstReflection extends AbstractAstReflection {
         switch (referenceId) {
             case 'Responsibility:refs': {
                 return SystemConstraint;
-            }
-            case 'Rule:action': {
-                return Command;
             }
             case 'SystemConstraint:refs': {
                 return Hazard;
