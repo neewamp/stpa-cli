@@ -9,7 +9,7 @@ import { generateJavaScript } from './generator';
 import { NodeFileSystem } from 'langium/node';
 import { AstNode } from 'langium';
 import { myContext, myRule, rule_to_myRule } from '../compiler/UCA';
-import { sendRule } from './uca-table-interface';
+import { sendRule, sendRules } from './uca-table-interface';
 import { PythonShellError } from 'python-shell';
 
 export const generateAction = async (fileName: string, opts: GenerateOptions): Promise<void> => {
@@ -47,17 +47,20 @@ export const parseAndValidate = async (fileName: string): Promise<void> => {
     const ast: AstNode = parseResult.value;
 
     if(isModel(ast)){
-    for(var rule of ast.rules) {
+       let myRules: myRule[] = ast.rules.map(rule_to_myRule)
+       sendRules(myRules)
+/*     for(var rule of ast.rules) {
             try { 
                 sendRule(rule_to_myRule(rule))
             }
             catch(error: any) {
                 console.log(`Problem running send rule with rule named: ${rule.name}`)
                 console.log(error.message)
-            }
-            /* console.log(JSON.stringify(r)); */
-        }
-    }
+            } 
+        } 
+*/
+        console.log('sdf')
+    } 
     else {
         process.exit(1);
     }
